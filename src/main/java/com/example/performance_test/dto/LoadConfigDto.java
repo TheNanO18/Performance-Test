@@ -1,18 +1,23 @@
 package com.example.performance_test.dto;
 
+import java.util.List;
+
 public class LoadConfigDto {
-	// 타겟DB 커넥션
+	// DB 연결 정보
 	private String targetDbUrl;
 	private String targetDbUsername;
 	private String targetDbPassword;
 	private String targetDbDriver;
 
-	// 화면 2: 부하 설정
-	private String testQuery; // DB에 실행할 쿼리
-	private int concurrency; // 동시 실행 스레드 수 (핵심)
-	private int durationSeconds; // 부하 지속 시간 (초)
-	private long delayMillis; // 쿼리와 쿼리 사이의 주기 (밀리초)
-	private String testName; // 테스트 이름 (이력 저장을 위해)
+	private String testName;
+	private int durationSeconds;
+
+	// 핵심 변경: 여러 태스크 설정을 담는 리스트
+	private List<LoadTaskConfig> tasks;
+
+	// 기본 생성자
+	public LoadConfigDto() {
+	}
 
 	public String getTargetDbUrl() {
 		return targetDbUrl;
@@ -24,6 +29,14 @@ public class LoadConfigDto {
 
 	public String getTargetDbUsername() {
 		return targetDbUsername;
+	}
+
+	public List<LoadTaskConfig> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<LoadTaskConfig> tasks) {
+		this.tasks = tasks;
 	}
 
 	public void setTargetDbUsername(String targetDbUsername) {
@@ -46,22 +59,6 @@ public class LoadConfigDto {
 		this.targetDbDriver = targetDbDriver;
 	}
 
-	public String getTestQuery() {
-		return testQuery;
-	}
-
-	public void setTestQuery(String testQuery) {
-		this.testQuery = testQuery;
-	}
-
-	public int getConcurrency() {
-		return concurrency;
-	}
-
-	public void setConcurrency(int concurrency) {
-		this.concurrency = concurrency;
-	}
-
 	public int getDurationSeconds() {
 		return durationSeconds;
 	}
@@ -70,19 +67,19 @@ public class LoadConfigDto {
 		this.durationSeconds = durationSeconds;
 	}
 
-	public long getDelayMillis() {
-		return delayMillis;
-	}
-
-	public void setDelayMillis(long delayMillis) {
-		this.delayMillis = delayMillis;
-	}
-
 	public String getTestName() {
 		return testName;
 	}
 
 	public void setTestName(String testName) {
 		this.testName = testName;
+	}
+
+	@Override
+	public String toString() {
+		// 실제 데이터가 출력되도록 수정
+		return "LoadConfigDto{" + "targetDbUrl='" + targetDbUrl + '\'' + ", testName='" + testName + '\''
+				+ ", durationSeconds=" + durationSeconds + ", tasks=" + (tasks != null ? tasks.toString() : "null")
+				+ '}';
 	}
 }

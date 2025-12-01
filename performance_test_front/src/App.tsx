@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx (수정된 부분)
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LoadTestConfigurationPage from './pages/LoadTestConfigurationPage'; 
+import MonitorPage from './pages/MonitorPage';
+// import HistoryPage from './pages/HistoryPage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="app-container">
+        <Routes>
+          {/* ⭐️ 문제 해결: "/" 경로를 명시적으로 "/config"로 리다이렉트하거나 
+            LoadTestConfigurationPage 컴포넌트를 렌더링하도록 수정
+          */}
+          
+          {/* 방법 A (권장): 루트 경로를 /config로 리다이렉트 */}
+          <Route path="/" element={<Navigate replace to="/config" />} />
+          
+          {/* 방법 B (대안): 루트 경로에서 바로 컴포넌트 렌더링 */}
+          {/* <Route path="/" element={<LoadTestConfigurationPage />} /> */}
+          
+
+          {/* LoadTestConfigurationPage 컴포넌트가 렌더링될 경로 */}
+          <Route path="/config" element={<LoadTestConfigurationPage />} />
+          
+          {/* 나머지 라우트 */}
+          <Route path="/monitor/:testId" element={<MonitorPage />} />
+          {/* <Route path="/history" element={<HistoryPage />} /> */}
+          
+          {/* 일치하는 경로가 없을 경우의 처리 (선택 사항) */}
+          <Route path="*" element={<h1>404 Not Found</h1>} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;
