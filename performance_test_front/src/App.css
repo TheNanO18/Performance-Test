@@ -74,11 +74,47 @@
 }
 
 .start-button {
-    background-color: #4CAF50; /* 초록색 */
+    background-color: #251996; /* 초록색 */
     color: white;
 }
 
 .stop-button {
-    background-color: #f44336; /* 빨간색 */
+    background-color: #720d06; /* 빨간색 */
     color: white;
+}
+
+/* task-input-group 내부의 요소 분리 */
+.task-input-group {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #1ca8df;
+}
+
+.task-input-group textarea {
+    /* 💡 수정: textarea의 높이를 고정하거나 최대 높이를 설정하여 아래 요소가 밀리는 것을 방지 */
+    min-height: 150px; 
+    max-height: 250px; /* 너무 커지는 것을 방지 */
+    width: 98%;
+    box-sizing: border-box;
+    margin-bottom: 10px; /* 아래 입력 필드와 간격 확보 */
+}
+
+/* 💡 동시 실행 수와 주기 입력 필드 (가로 배치) */
+.concurrency-delay-group label {
+    display: inline-block;
+    width: 48%; /* 너비 조정 */
+    margin-right: 2%;
+}
+
+.query-area button {
+    margin-top: 10px;
+}
+
+.remove-button {
+    background-color: #74130c;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-left: 10px;
 }
