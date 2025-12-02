@@ -9,7 +9,7 @@ const DEFAULT_TASK: LoadTaskConfig = {
     taskName: 'Task-1',
     testQuery: 'SELECT NOW();',
     concurrency: 10,
-    delayMillis: 100,
+    delaySeconds: 5,
 };
 
 // 초기 상태값 설정
@@ -50,7 +50,7 @@ export default function LoadTestConfigurationPage() {
 
         setConfig((prev: LoadConfig) => {
             const newTasks = [...prev.tasks];
-            const isNumeric = name === 'concurrency' || name === 'delayMillis';
+            const isNumeric = name === 'concurrency' || name === 'delaySeconds';
             
             const numValue = isNumeric ? (isNaN(Number(value)) ? 0 : Number(value)) : value;
             
@@ -141,8 +141,8 @@ export default function LoadTestConfigurationPage() {
                                     <input type="number" name="concurrency" value={task.concurrency} onChange={(e) => handleTaskChange(index, e)} min="1" required />
                                 </label>
                                 
-                                <label>주기 (ms):
-                                    <input type="number" name="delayMillis" value={task.delayMillis} onChange={(e) => handleTaskChange(index, e)} min="0" />
+                                <label>주기 (Sec):
+                                    <input type="number" name="delaySeconds" value={task.delaySeconds} onChange={(e) => handleTaskChange(index, e)} min="0" />
                                 </label>
                             </div>
                             

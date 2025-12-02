@@ -49,7 +49,7 @@ public class LoadWorker implements Runnable {
 
 			try {
 				// 쿼리 실행 시간 외에 추가로 대기해야 할 시간 계산
-				long waitTime = taskConfig.getDelayMillis() - executionTime;
+				long waitTime = (taskConfig.getDelaySeconds() * 1000) - executionTime;
 
 				if (waitTime > 0) {
 					Thread.sleep(waitTime);
