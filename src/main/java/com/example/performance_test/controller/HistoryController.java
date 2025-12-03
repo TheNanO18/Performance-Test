@@ -27,7 +27,7 @@ public class HistoryController {
  @GetMapping("/results")
  public ResponseEntity<List<TestHistoryDto>> getHistoryResults(@RequestParam String testName) {
      
-     List<TestHistoryDto> results = testResultRepository.findAggregatedResultsByTestName(testName);
+     List<TestHistoryDto> results = testResultRepository.findNormalizedResultsByTestName(testName);
      
      if (results.isEmpty()) {
          return ResponseEntity.notFound().build();

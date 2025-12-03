@@ -13,18 +13,19 @@ import com.example.performance_test.repository.entity.TestResultEntity;
 @Repository
 public interface TestResultRepository extends JpaRepository<TestResultEntity, Long> {
 
-    // 💡 새로운 조회 메서드: 특정 Test Name의 모든 데이터를 집계하여 반환
-    @Query(value = 
-        "SELECT new com.example.performance_test.dto.TestHistoryDto(" +
-        "   t.testName, " +
-        "   t.testTimeSec, " + // testTime_sec 컬럼명과 매핑
-        "   SUM(t.totalCpuCores), " +
-        "   SUM(t.totalSystemCpuTime), " +
-        "   SUM(t.totalUserCpuTime)) " +
-        "FROM TestResultEntity t " +
-        "WHERE t.testName = :testName " + // @Param("testName")과 매핑
-        "GROUP BY t.testName, t.testTimeSec"
-        // 'testTime_sec'는 Entity에 'testTime'으로 매핑되어 있으므로 t.testTime을 사용
-    )
-    List<TestHistoryDto> findAggregatedResultsByTestName(@Param("testName") String testName);
+	// com.example.performance_test.repository.TestResultRepository.java
+
+	@Query(value = 
+	    "SELECT new com.example.performance_test.dto.TestHistoryDto(" +
+	    "   t.testName, " +
+	    "   t.testTimeSec, " + 
+	    "   (SUM(t.totalCpuCores) / (COUNT(t) * t.testTimeSec)) * 10000, " +      
+	    "   (SUM(t.totalSystemCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " + 
+	    "   (SUM(t.totalUserCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " +  
+	    "   MAX(t.testEndTime)) " +
+	    "FROM TestResultEntity t " +
+	    "WHERE t.testName = :testName " + 
+	    "GROUP BY t.testName, t.testTimeSec" 
+	)
+	List<TestHistoryDto> findNormalizedResultsByTestName(@Param("testName") String testName);
 }

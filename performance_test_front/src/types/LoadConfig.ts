@@ -32,4 +32,5 @@ export interface TestHistoryDto {
     totalCpuCores: number; // BigDecimal은 number로 매핑
     totalSystemCpuTime: number;
     totalUserCpuTime: number;
+    maxTestEndTime: Date;
 }

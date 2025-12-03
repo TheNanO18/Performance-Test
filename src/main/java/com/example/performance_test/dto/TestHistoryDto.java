@@ -1,6 +1,7 @@
 package com.example.performance_test.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class TestHistoryDto {
 	private String testName;
@@ -8,13 +9,23 @@ public class TestHistoryDto {
 	private BigDecimal totalCpuCores;
 	private BigDecimal totalSystemCpuTime;
 	private BigDecimal totalUserCpuTime;
+	private LocalDateTime maxTestEndTime;
 
-	public TestHistoryDto(String testName, Integer testTimeSec, BigDecimal totalCpuCores, BigDecimal totalSystemCpuTime, BigDecimal totalUserCpuTime) {
+	public TestHistoryDto(String testName, Integer testTimeSec, BigDecimal totalCpuCores, BigDecimal totalSystemCpuTime, BigDecimal totalUserCpuTime, LocalDateTime maxTestEndTime) {
 		this.testName = testName;
 		this.testTimeSec = testTimeSec;
 		this.totalCpuCores = totalCpuCores;
 		this.totalSystemCpuTime = totalSystemCpuTime;
 		this.totalUserCpuTime = totalUserCpuTime;
+		this.maxTestEndTime = maxTestEndTime;
+	}
+
+	public LocalDateTime getMaxTestEndTime() {
+		return maxTestEndTime;
+	}
+
+	public void setMaxTestEndTime(LocalDateTime maxTestEndTime) {
+		this.maxTestEndTime = maxTestEndTime;
 	}
 
 	public TestHistoryDto() {}
