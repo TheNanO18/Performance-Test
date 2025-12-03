@@ -12,7 +12,7 @@
 .main-layout-grid {
     display: grid;
     /* 좌측(쿼리)에 더 넓은 공간(2fr), 우측(설정)에 좁은 공간(1fr) 할당 */
-    grid-template-columns: 2fr 1fr; 
+    grid-template-columns: 1fr 1fr; 
     /* 3개의 행: 상단 DB 정보, 중단 부하 정보, 하단 버튼 */
     gap: 15px;
     min-height: 90vh;
