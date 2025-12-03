@@ -13,6 +13,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html, body, #root {
+    height: 100%; 
+    width:100%;
+    margin: 0;
+    padding: 0;
+    /* overflow-x: hidden; 수직 스크롤 문제 없으면 제거 */
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -24,10 +32,10 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
+  min-width: 100%;
 }
 
 h1 {

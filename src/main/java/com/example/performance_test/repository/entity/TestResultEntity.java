@@ -25,7 +25,7 @@ public class TestResultEntity {
     @Column(name = "test_name", length = 64)
     private String testName; 
     
-    // Test_Time (INTEGER, 지속 시간)
+    // Test_Time_Sec (INTEGER, 지속 시간)
     @Column(name = "test_time_sec")
     private Integer testTimeSec; 
     

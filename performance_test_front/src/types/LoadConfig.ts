@@ -25,3 +25,11 @@ export interface TestResult {
     cpuTime: number; 
     // ... 기타 실시간 지표
 }
+
+export interface TestHistoryDto {
+    testName: string;
+    testTimeSec: number;
+    totalCpuCores: number; // BigDecimal은 number로 매핑
+    totalSystemCpuTime: number;
+    totalUserCpuTime: number;
+}

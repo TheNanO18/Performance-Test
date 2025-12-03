@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { type LoadConfig } from '../types/LoadConfig'; 
 import { type LoadTaskConfig } from '../types/LoadTaskConfig'; 
+import HistoryGraphPanel from '../components/HistoryGraphPanel';
 
 // LoadTaskConfig의 기본값 템플릿
 const DEFAULT_TASK: LoadTaskConfig = {
@@ -153,31 +154,36 @@ export default function LoadTestConfigurationPage() {
                         </div>
                     ))}
                     <button onClick={handleAddTask} className="add-task-button">+ 태스크 추가</button>
-                </div>
-                
-                {/* 2. 우측 상단: DB 연결 정보 */}
-                <div className="db-info-area">
-                    <h3>DB 연결 정보</h3>
-                    <label>URL: <input type="text" name="targetDbUrl" value={config.targetDbUrl} onChange={handleMainChange} /></label>
-                    <label>Username: <input type="text" name="targetDbUsername" value={config.targetDbUsername} onChange={handleMainChange} /></label>
-                    <label>Password: <input type="password" name="targetDbPassword" value={config.targetDbPassword} onChange={handleMainChange} /></label>
-                </div>
-                
-                {/* 3. 우측 하단: 전체 테스트 정보 */}
-                <div className="load-test-info-area">
-                    <h3>전체 테스트 정보</h3>
-                    <label>테스트 이름: <input type="text" name="testName" value={config.testName} onChange={handleMainChange} /></label>
-                    <label>지속 시간 (초): <input type="number" name="durationSeconds" value={config.durationSeconds} onChange={handleMainChange} /></label>
-                </div>
-                
-                {/* 4. 하단 버튼 */}
-                <div className="control-buttons">
+                    {/* 4. 하단 버튼 영역은 그래프 패널 아래에 오도록 CSS 조정 */}
                     <button onClick={handleStart} disabled={isLoading} className="start-button">
                         {isLoading ? '테스트 시작 중...' : 'START'}
                     </button>
                     <button onClick={handleStop} disabled={isLoading} className="stop-button">
                         STOP
                     </button>
+                    
+                    {/* 2. 우측 상단: DB 연결 정보 */}
+                    <div className="db-info-area">
+                        <h3>DB 연결 정보</h3>
+                        <label>URL: <input type="text" name="targetDbUrl" value={config.targetDbUrl} onChange={handleMainChange} /></label>
+                        <label>Username: <input type="text" name="targetDbUsername" value={config.targetDbUsername} onChange={handleMainChange} /></label>
+                        <label>Password: <input type="password" name="targetDbPassword" value={config.targetDbPassword} onChange={handleMainChange} /></label>
+                    </div>
+                    
+                    {/* 3. 우측 하단: 전체 테스트 정보 */}
+                    <div className="load-test-info-area">
+                        <h3>전체 테스트 정보</h3>
+                        <label>테스트 이름: <input type="text" name="testName" value={config.testName} onChange={handleMainChange} /></label>
+                        <label>지속 시간 (초): <input type="number" name="durationSeconds" value={config.durationSeconds} onChange={handleMainChange} /></label>
+                    </div>
+                </div>
+                
+                <div className="right-panel">
+                    
+                    {/* 3. 💡 오른쪽 영역에 그래프 패널 배치 (우측 1열의 1~3행 모두 차지) */}
+                    <div className="history-panel">
+                        <HistoryGraphPanel />
+                    </div>
                 </div>
             </div>
         </div>
