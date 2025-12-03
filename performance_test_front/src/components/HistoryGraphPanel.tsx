@@ -33,14 +33,17 @@ const initialChartData: ChartData<'bar'> = {
     datasets: [],
 };
 
-const COLOR_PALETTE = [
-    'rgba(255, 99, 132, 0.8)',   // 밝은 빨강
-    'rgba(54, 162, 235, 0.8)',   // 파랑
-    'rgba(255, 206, 86, 0.8)',   // 노랑
-    'rgba(75, 192, 192, 0.8)',   // 초록/청록
-    'rgba(153, 102, 255, 0.8)',  // 보라
-    'rgba(255, 159, 64, 0.8)',   // 주황
-];
+const METRIC_LABELS = {
+    cores: '총 CPU 코어 사용량 (Cores)',
+    system: '총 시스템 CPU 시간 (sec)',
+    user: '총 사용자 CPU 시간 (sec)',
+};
+
+const METRIC_COLORS = {
+    cores: 'rgba(54, 162, 235, 0.8)',   // 파랑 (Cores)
+    system: 'rgba(255, 99, 132, 0.8)',   // 빨강 (System Time)
+    user: 'rgba(75, 192, 192, 0.8)',    // 청록 (User Time)
+};
 
 export default function HistoryGraphPanel() {
     // 비교할 테스트 이름 목록을 상태로 관리
@@ -82,54 +85,65 @@ export default function HistoryGraphPanel() {
         try {
             const responses = await Promise.all(dataPromises);
             // 💡 res.data를 TestHistoryDto 배열로 타입 변환 (Any 오류 해결)
-            const labels: string[] = [];      // 💡 X축 레이블 (테스트 이름)
-            const dataValues: number[] = [];  // 💡 Y축 데이터 (CPU 총합)
-            const barColors: string[] = [];   // 💡 각 막대의 색상
+            const labels: string[] = [];
+            const coresData: number[] = [];      // totalCpuCores 값
+            const systemTimeData: number[] = []; // totalSystemCpuTime 값
+            const userTimeData: number[] = [];   // totalUserCpuTime 값
     
             responses.forEach((res: any, index: number) => {
                 const historyData: TestHistoryDto[] = res.data; 
                 const testName = testNames[index];
                 
                 // Y축 값 합산
-                const combinedTotalCpu = historyData.reduce((acc, item) => {
-                    const combinedMetric = item.totalCpuCores + item.totalSystemCpuTime + item.totalUserCpuTime;
-                    return acc + combinedMetric;
-                }, 0);
-    
-                // 데이터 수집
-                labels.push(testName); // X축 레이블 수집
-                dataValues.push(combinedTotalCpu); // Y축 데이터 수집
-                
-                // 색상 할당
-                const colorIndex = index % COLOR_PALETTE.length;
-                barColors.push(COLOR_PALETTE[colorIndex]);
+                const aggregated = historyData.reduce((acc, item) => {
+                acc.cores += item.totalCpuCores;
+                acc.system += item.totalSystemCpuTime;
+                acc.user += item.totalUserCpuTime;
+                return acc;
+            }, { cores: 0, system: 0, user: 0 });
+
+            // 3. 배열에 데이터 저장
+                labels.push(testName);
+                coresData.push(aggregated.cores);
+                systemTimeData.push(aggregated.system);
+                userTimeData.push(aggregated.user);
             });
 
             // 2. 차트 데이터셋 생성
-            const datasets = [{
-                    label: "총 CPU 사용량 합계 (sec + cores)",
-                    data: dataValues, // 🚨 모든 Y축 값을 가진 단일 배열
-                    
-                    // 💡 모든 막대의 색상 배열을 여기에 설정
-                    backgroundColor: barColors, 
-                    
-                    borderColor: barColors.map(color => color.replace('0.8', '1')), 
-                    borderWidth: 1,
-                }];
-                
-                // 3. 차트 데이터 설정
-                setChartData({
-                    labels: labels, // 🚨 X축 레이블은 수집된 모든 테스트 이름
-                    datasets: datasets
-                });
-                setStatusMessage('그래프 데이터 로딩 성공.');
+            const datasets = [
+            {
+                label: METRIC_LABELS.cores,
+                data: coresData,
+                backgroundColor: METRIC_COLORS.cores,
+                stack: 'cpu_stack'
+            },
+            {
+                label: METRIC_LABELS.system,
+                data: systemTimeData,
+                backgroundColor: METRIC_COLORS.system,
+                stack: 'cpu_stack',
+            },
+            {
+                label: METRIC_LABELS.user,
+                data: userTimeData,
+                backgroundColor: METRIC_COLORS.user,
+                stack: 'cpu_stack',
+            },
+        ];
         
-                } catch (error) {
-                    console.error('이력 데이터 로딩 실패:', error);
-                    setStatusMessage('❌ 이력 데이터를 불러오는 데 실패했습니다. 백엔드 API를 확인하세요.');
-                    setChartData(initialChartData);
-                }
-            };
+        // 5. 차트 데이터 설정
+        setChartData({
+            labels: labels,
+            datasets: datasets
+        });
+        setStatusMessage('그래프 데이터 로딩 성공.');
+        
+        } catch (error) {
+            console.error('이력 데이터 로딩 실패:', error);
+            setStatusMessage('❌ 이력 데이터를 불러오는 데 실패했습니다. 백엔드 API를 확인하세요.');
+            setChartData(initialChartData);
+        }
+    };
 
     // testNames 상태가 변경되거나 컴포넌트가 마운트될 때 데이터 로딩 시작
     useEffect(() => {
@@ -143,11 +157,19 @@ export default function HistoryGraphPanel() {
             legend: { position: 'top' as const },
             title: { display: true, text: '테스트 CPU 사용량 비교 (Total Cores)' },
         },
+
+        interaction: {
+            mode: 'index' as 'index',    // 👈 동일 X축 위치의 모든 데이터셋을 표시
+            intersect: false, // 👈 막대 위에 있지 않아도 가까이 있으면 표시 (선택 사항)
+        },
+
         scales: {
             y: {
                 title: { display: true, text: 'Total Sum CPU Data' }
             },
             x: {
+                stacked:true,
+
                 title: { display: true, text: 'Test Name' }
             }
         },
