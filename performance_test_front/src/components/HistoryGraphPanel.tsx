@@ -92,9 +92,6 @@ export default function HistoryGraphPanel() {
             const coresData: number[] = [];      // totalCpuCores 값
             const systemTimeData: number[] = []; // totalSystemCpuTime 값
             const userTimeData: number[] = [];   // totalUserCpuTime 값
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 
             const newMap = new Map<string, TestHistoryDto>();
             responses.forEach((res: any) => {
@@ -106,40 +103,19 @@ export default function HistoryGraphPanel() {
                 }
             });
             setHistoryDataMap(newMap);
-
-=======
->>>>>>> 8f72c35 (tooltip 수정)
-    
->>>>>>> f6539d5a117a40c6fa1cdd92a8d3b52ec3403b0f
             responses.forEach((res: any, index: number) => {
                 const historyData: TestHistoryDto[] = res.data;
                 const testName = testNames[index];
 
                 // Y축 값 합산
                 const aggregated = historyData.reduce((acc, item) => {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
                     acc.cores += item.totalCpuCores;
                     acc.system += item.totalSystemCpuTime;
                     acc.user += item.totalUserCpuTime;
                     return acc;
                 }, { cores: 0, system: 0, user: 0 });
 
-                // 3. 배열에 데이터 저장
-=======
->>>>>>> 8f72c35 (tooltip 수정)
-                acc.cores += item.totalCpuCores;
-                acc.system += item.totalSystemCpuTime;
-                acc.user += item.totalUserCpuTime;
-                return acc;
-            }, { cores: 0, system: 0, user: 0 });
-
             // 3. 배열에 데이터 저장
-<<<<<<< HEAD
-=======
->>>>>>> f6539d5a117a40c6fa1cdd92a8d3b52ec3403b0f
->>>>>>> 8f72c35 (tooltip 수정)
                 labels.push(testName);
                 coresData.push(aggregated.cores);
                 systemTimeData.push(aggregated.system);
@@ -148,9 +124,6 @@ export default function HistoryGraphPanel() {
 
             // 2. 차트 데이터셋 생성
             const datasets = [
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
                 {
                     label: METRIC_LABELS.cores,
                     data: coresData,
@@ -177,40 +150,7 @@ export default function HistoryGraphPanel() {
                 datasets: datasets
             });
             setStatusMessage('그래프 데이터 로딩 성공.');
-
-=======
->>>>>>> 8f72c35 (tooltip 수정)
-            {
-                label: METRIC_LABELS.cores,
-                data: coresData,
-                backgroundColor: METRIC_COLORS.cores,
-                stack: 'cpu_stack'
-            },
-            {
-                label: METRIC_LABELS.system,
-                data: systemTimeData,
-                backgroundColor: METRIC_COLORS.system,
-                stack: 'cpu_stack',
-            },
-            {
-                label: METRIC_LABELS.user,
-                data: userTimeData,
-                backgroundColor: METRIC_COLORS.user,
-                stack: 'cpu_stack',
-            },
-        ];
-        
-        // 5. 차트 데이터 설정
-        setChartData({
-            labels: labels,
-            datasets: datasets
-        });
-        setStatusMessage('그래프 데이터 로딩 성공.');
-        
-<<<<<<< HEAD
-=======
->>>>>>> f6539d5a117a40c6fa1cdd92a8d3b52ec3403b0f
->>>>>>> 8f72c35 (tooltip 수정)
+            
         } catch (error) {
             console.error('이력 데이터 로딩 실패:', error);
             setStatusMessage('❌ 이력 데이터를 불러오는 데 실패했습니다. 백엔드 API를 확인하세요.');
@@ -257,16 +197,6 @@ export default function HistoryGraphPanel() {
                 title: { display: true, text: 'Total Sum CPU Data' }
             },
             x: {
-<<<<<<< HEAD
-                stacked:true,
-=======
-<<<<<<< HEAD
-                stacked: true,
-=======
-                stacked:true,
->>>>>>> f6539d5a117a40c6fa1cdd92a8d3b52ec3403b0f
->>>>>>> 8f72c35 (tooltip 수정)
-
                 title: { display: true, text: 'Test Name' }
             }
         },
