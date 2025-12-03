@@ -150,7 +150,7 @@ export default function HistoryGraphPanel() {
                 datasets: datasets
             });
             setStatusMessage('그래프 데이터 로딩 성공.');
-            
+
         } catch (error) {
             console.error('이력 데이터 로딩 실패:', error);
             setStatusMessage('❌ 이력 데이터를 불러오는 데 실패했습니다. 백엔드 API를 확인하세요.');
@@ -168,6 +168,7 @@ export default function HistoryGraphPanel() {
         responsive: true,
         plugins: {
             legend: { position: 'top' as const },
+            title: { display: true, text: 'Test Data 비교 (정규화 값 * 10000)' },
             tooltip: { // 💡 Tooltip 콜백 추가
                 callbacks: {
                     title: function (context: any) {
