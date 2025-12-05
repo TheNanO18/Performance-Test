@@ -24,8 +24,11 @@ public interface TestResultRepository extends JpaRepository<TestResultEntity, Lo
 	    "   (SUM(t.totalUserCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " +  
 	    "   MAX(t.testEndTime)) " +
 	    "FROM TestResultEntity t " +
-	    "WHERE t.testName = :testName " + 
+	    "WHERE t.testName = :testName AND " + 
+	    "(:querySearch IS NULL OR t.query LIKE CONCAT('%', :querySearch, '%')) " +
 	    "GROUP BY t.testName, t.testTimeSec" 
 	)
-	List<TestHistoryDto> findNormalizedResultsByTestName(@Param("testName") String testName);
+	
+	
+	List<TestHistoryDto> findNormalizedResultsByTestName(@Param("testName") String testName, @Param("querySearch") String querySearch);
 }

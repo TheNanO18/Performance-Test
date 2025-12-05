@@ -34,3 +34,14 @@ export interface TestHistoryDto {
     totalUserCpuTime: number;
     maxTestEndTime: Date;
 }
+
+export interface TestResultDto {
+    id: number;
+    testName: string;
+    testTimeSec: number;
+    maxTestEndTime: Date;
+    normalizedQueryHash: string; // BigDecimal은 number로 매핑
+    totalCpuCores: number; // BigDecimal은 number로 매핑
+    totalSystemCpuTime: number;
+    totalUserCpuTime: number;
+}

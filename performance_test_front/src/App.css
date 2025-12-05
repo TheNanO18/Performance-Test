@@ -20,6 +20,58 @@
     min-width: 100%;
 }
 
+.main-layout-grid-v4 {
+    height: 100%; /* 부모 .full-screen-container의 높이를 상속 */
+    display: grid;
+    grid-template-columns: 250px 1fr; /* 💡 메뉴 너비를 250px로 고정, 컨텐츠가 나머지 차지 */
+    gap: 15px;
+}
+
+/* 2. 좌측 메뉴 패널 스타일 */
+.side-nav-menu {
+    grid-column: 1;
+    background-color: #2a2a2a; /* 메뉴 배경색 */
+    padding: 15px;
+    border-right: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 메뉴 버튼 스타일 (Link 컴포넌트에 적용) */
+.side-nav .nav-item {
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #eee;
+    background-color: #3e3e3e;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.side-nav .nav-item:hover {
+    background-color: #555;
+}
+
+/* 활성화된 버튼 강조 */
+.side-nav .nav-item.nav-active {
+    background-color: #007bff;
+    font-weight: bold;
+}
+
+/* 3. 우측 컨텐츠 영역 */
+.page-content-view {
+    grid-column: 2;
+    padding: 15px;
+    /* 💡 컨텐츠가 넘칠 경우 스크롤 허용 */
+    overflow-y: auto; 
+}
+
 .right-panel {
     grid-column: 2;
     display: flex;

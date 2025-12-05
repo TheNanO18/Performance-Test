@@ -47,11 +47,12 @@ const METRIC_COLORS = {
 
 export default function HistoryGraphPanel() {
     // 비교할 테스트 이름 목록을 상태로 관리
-    const [testNames, setTestNames] = useState<string[]>(['Multi_Load_Test']);
+    const [testNames, setTestNames] = useState<string[]>(['CPU Test']);
     // chartData 상태에 ChartData<'line'> 타입을 명시
     const [chartData, setChartData] = useState<ChartData<'bar'>>(initialChartData);
     const [statusMessage, setStatusMessage] = useState('테스트 이력 조회 준비 완료.');
     const [tempTestName, setTempTestName] = useState('');
+    const [querySearch, setQuerySearch] = useState('');
 
     // 💡 API 응답 전체를 저장할 상태 (툴팁 콜백에서 참조할 데이터)
     const [historyDataMap, setHistoryDataMap] = useState<Map<string, TestHistoryDto>>(() => new Map());
@@ -79,11 +80,18 @@ export default function HistoryGraphPanel() {
             return;
         }
 
-        setStatusMessage('데이터 로딩 중...');
+        const dataPromises = testNames.map(name => {
+            let url = `/api/history/results?testName=${name}`;
 
-        const dataPromises = testNames.map(name =>
-            axios.get(`/api/history/results?testName=${name}`)
-        );
+            // 💡 querySearch 상태 값 (컴포넌트 내부 상태)을 사용합니다.
+            if (querySearch) {
+                // URL 인코딩을 적용하여 특수 문자를 안전하게 전송
+                url += `&querySearch=${encodeURIComponent(querySearch)}`;
+            }
+            return axios.get(url);
+        });
+
+        setStatusMessage('데이터 로딩 중...');
 
         try {
             const responses = await Promise.all(dataPromises);
@@ -115,7 +123,7 @@ export default function HistoryGraphPanel() {
                     return acc;
                 }, { cores: 0, system: 0, user: 0 });
 
-            // 3. 배열에 데이터 저장
+                // 3. 배열에 데이터 저장
                 labels.push(testName);
                 coresData.push(aggregated.cores);
                 systemTimeData.push(aggregated.system);
@@ -161,7 +169,7 @@ export default function HistoryGraphPanel() {
     // testNames 상태가 변경되거나 컴포넌트가 마운트될 때 데이터 로딩 시작
     useEffect(() => {
         fetchDataAndDrawGraph();
-    }, [testNames]);
+    }, [testNames, querySearch]);
 
     // Chart Options (그래프 설정)
     const chartOptions = {
@@ -211,6 +219,19 @@ export default function HistoryGraphPanel() {
             {/* 임시 UI: 비교할 테스트 이름 추가/입력 필드 */}
             {/* 💡 실제 구현 시, 사용자가 Test Name을 입력/선택하고 setTestNames를 호출하도록 해야 합니다. */}
 
+            <div style={{ marginBottom: '15px' }}>
+                <input
+                    type="text"
+                    value={querySearch}
+                    onChange={(e) => setQuerySearch(e.target.value)}
+                    placeholder="예: SELECT NOW"
+                    style={{ width: '150px', marginRight: '10px' }}
+                />
+                <label>쿼리 패턴 검색 (LIKE %) </label>
+                <button onClick={() => fetchDataAndDrawGraph()}>
+                    적용/검색
+                </button>
+            </div>
             <div style={{ marginBottom: '15px' }}>
                 <input
                     type="text"

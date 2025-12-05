@@ -25,9 +25,9 @@ public class HistoryController {
 
  // 💡 GET /api/history/results?testName=TEST_A
  @GetMapping("/results")
- public ResponseEntity<List<TestHistoryDto>> getHistoryResults(@RequestParam String testName) {
+ public ResponseEntity<List<TestHistoryDto>> getHistoryResults(@RequestParam String testName, @RequestParam(required = false) String querySearch) {
      
-     List<TestHistoryDto> results = testResultRepository.findNormalizedResultsByTestName(testName);
+     List<TestHistoryDto> results = testResultRepository.findNormalizedResultsByTestName(testName, querySearch);
      
      if (results.isEmpty()) {
          return ResponseEntity.notFound().build();

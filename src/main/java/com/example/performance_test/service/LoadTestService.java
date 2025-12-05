@@ -147,11 +147,12 @@ public class LoadTestService {
 	        String clickHouseQuery = 
 	            "SELECT query, " + 
 	            "event_time, " + // 💡 쉼표(,) 추가됨
+	            "normalized_query_hash, " +
 	            "sum(ProfileEvents['UserTimeMicroseconds']) / 1e6 AS Total_User_CPU_Time_sec, " +
 	            "sum(ProfileEvents['SystemTimeMicroseconds']) / 1e6 AS Total_System_CPU_Time_sec, " +
 	            "sum(ProfileEvents['OSCPUVirtualTimeMicroseconds']) / 1e6 AS Total_Cores " +
 	            "FROM system.query_log WHERE event_time > now() - INTERVAL " + finalTestTime + " SECOND " +
-	            "AND CAST(type, 'Int8') IN (2, 4) GROUP BY query, event_time ORDER BY Total_Cores DESC"; // 💡 GROUP BY query, event_time로 개별 실행 건 추출
+	            "AND CAST(type, 'Int8') IN (2, 4) GROUP BY query, event_time, normalized_query_hash"; // 💡 GROUP BY query, event_time로 개별 실행 건 추출
 
 	        // 2. 쿼리 실행 및 결과 저장
 	        try (ResultSet rs = stmt.executeQuery(clickHouseQuery)) {
@@ -173,6 +174,7 @@ public class LoadTestService {
 	                
 	                // ClickHouse 결과 필드 매핑
 	                entity.setQuery(rs.getString("query"));
+	                entity.setNormalizedQueryHash(rs.getString("normalized_query_hash"));
 	                
 	                // NUMERIC(22,2) 타입에 맞춰 BigDecimal로 변환하여 저장
 	                entity.setTotalUserCpuTime(BigDecimal.valueOf(rs.getDouble("Total_User_CPU_Time_sec")));

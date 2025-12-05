@@ -8,6 +8,7 @@ export default defineConfig({
   
   server: {
     port: 5173, // React 개발 서버 포트 설정 (기본값)
+    host: true,
     
     // 💡 프록시 설정 (백엔드 서버로 요청 전달)
     proxy: {
