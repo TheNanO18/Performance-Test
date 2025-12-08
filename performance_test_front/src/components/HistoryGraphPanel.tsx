@@ -81,7 +81,7 @@ export default function HistoryGraphPanel() {
         }
 
         const dataPromises = testNames.map(name => {
-            let url = `/api/history/results?testName=${name}`;
+            let url = `/api/history/stress-results?testName=${name}`;
 
             // 💡 querySearch 상태 값 (컴포넌트 내부 상태)을 사용합니다.
             if (querySearch) {
