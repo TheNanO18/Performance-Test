@@ -13,8 +13,8 @@ import jakarta.persistence.Table;
 
 // 테이블 이름 명시
 @Entity
-@Table(name = "cpu_test")
-public class TestResultEntity {
+@Table(name = "query_cpu_test")
+public class TestQueryResultEntity {
 
 	// 💡 PK 필드: PostgreSQL의 SERIAL 타입에 맞춰 IDENTITY 전략 사용
 	@Id
@@ -41,6 +41,10 @@ public class TestResultEntity {
 	@Column(name = "normalized_query_hash", length = 64)
 	private String normalizedQueryHash;
 
+	// http_user_agent (VARCHAR(128))
+	@Column(name = "http_user_agent", length = 256)
+	private String httpUserAgent;
+
 	// Query (TEXT)
 	@Column(name = "query", columnDefinition = "TEXT")
 	private String query;
@@ -60,7 +64,7 @@ public class TestResultEntity {
 	// --- Getter, Setter, Constructors (Lombok 없이 수동 구현 필요) ---
 
 	// 기본 생성자 (JPA 필수)
-	public TestResultEntity() {
+	public TestQueryResultEntity() {
 	}
 
 	// 💡 모든 필드에 대한 Getter 및 Setter를 여기에 수동으로 추가해야 합니다.
@@ -98,12 +102,20 @@ public class TestResultEntity {
 		this.testEndTime = testEndTime;
 	}
 
-	public String getNormalizedQueryJash() {
+	public String getNormalizedQueryHash() {
 		return normalizedQueryHash;
 	}
 
 	public void setNormalizedQueryHash(String normalizedQueryHash) {
 		this.normalizedQueryHash = normalizedQueryHash;
+	}
+
+	public String getsetHttpUserAgent() {
+		return httpUserAgent;
+	}
+
+	public void setHttpUserAgent(String httpUserAgent) {
+		this.httpUserAgent = httpUserAgent;
 	}
 
 	public String getQuery() {

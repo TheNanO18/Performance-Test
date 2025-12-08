@@ -19,8 +19,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.performance_test.dto.LoadConfigDto;
 import com.example.performance_test.dto.LoadTaskConfig;
-import com.example.performance_test.repository.TestResultRepository;
-import com.example.performance_test.repository.entity.TestResultEntity;
+import com.example.performance_test.repository.TestQueryHashResultRepository;
+import com.example.performance_test.repository.TestServerResultRepository;
+import com.example.performance_test.repository.entity.TestQueryResultEntity;
+import com.example.performance_test.repository.entity.TestServerResultEntity;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -29,7 +31,8 @@ public class LoadTestService {
 
 	// 전체 테스트를 관리할 ExecutorService
 	private ExecutorService loadExecutorService;
-	private TestResultRepository testResultRepository;
+	private TestQueryHashResultRepository testQueryHashResultRepository;
+	private TestServerResultRepository testServerResultRepository;
 
 	// 스레드 안전한 카운터 (실시간 지표 계산에 사용)
 	private final AtomicInteger totalExecutedRequests = new AtomicInteger(0);
@@ -40,8 +43,10 @@ public class LoadTestService {
 	private String currentTestId;
 
 	@Autowired
-	public LoadTestService(TestResultRepository testResultRepository) {
-		this.testResultRepository = testResultRepository;
+	public LoadTestService(TestQueryHashResultRepository testResultRepository,
+			TestServerResultRepository testServerResultRepository) {
+		this.testQueryHashResultRepository = testResultRepository;
+		this.testServerResultRepository = testServerResultRepository;
 	}
 
 	private LocalDateTime testStartTime;
@@ -125,73 +130,100 @@ public class LoadTestService {
 	}
 
 	private void saveTestResults(LoadConfigDto config) {
-	    if (loadTargetDataSource == null) {
-	        System.err.println("❌ [Service] DataSource가 닫혀있어 결과를 저장할 수 없습니다.");
-	        return;
-	    }
+		if (loadTargetDataSource == null) {
+			System.err.println("❌ [Service] DataSource가 닫혀있어 결과를 저장할 수 없습니다.");
+			return;
+		}
 
-	    LocalDateTime endTime = LocalDateTime.now(); // 테스트 종료 시간 기록
-	    
-	    long actualDurationSeconds = 0;
-	    if (this.testStartTime != null) {
-	        // testStartTime과 endTime 사이의 Duration을 구하고 초(seconds)로 변환
-	        actualDurationSeconds = Duration.between(this.testStartTime, endTime).getSeconds();
-	    }
-	    
-	    int finalTestTime = (int) Math.max(1, actualDurationSeconds);
-	    
-	    try (Connection conn = loadTargetDataSource.getConnection();
-	         Statement stmt = conn.createStatement()) {
-	         
-	        // 1. ClickHouse 쿼리 정의 (event_time에 쉼표 추가 및 GROUP BY 수정 완료)
-	        String clickHouseQuery = 
-	            "SELECT query, " + 
-	            "event_time, " + // 💡 쉼표(,) 추가됨
-	            "normalized_query_hash, " +
-	            "sum(ProfileEvents['UserTimeMicroseconds']) / 1e6 AS Total_User_CPU_Time_sec, " +
-	            "sum(ProfileEvents['SystemTimeMicroseconds']) / 1e6 AS Total_System_CPU_Time_sec, " +
-	            "sum(ProfileEvents['OSCPUVirtualTimeMicroseconds']) / 1e6 AS Total_Cores " +
-	            "FROM system.query_log WHERE event_time > now() - INTERVAL " + finalTestTime + " SECOND " +
-	            "AND CAST(type, 'Int8') IN (2, 4) GROUP BY query, event_time, normalized_query_hash"; // 💡 GROUP BY query, event_time로 개별 실행 건 추출
+		LocalDateTime endTime = LocalDateTime.now(); // 테스트 종료 시간 기록
 
-	        // 2. 쿼리 실행 및 결과 저장
-	        try (ResultSet rs = stmt.executeQuery(clickHouseQuery)) {
-	            List<TestResultEntity> entitiesToSave = new ArrayList<>();
-	            
-	            while (rs.next()) {
-	                TestResultEntity entity = new TestResultEntity();
-	                
-	                // --- ClickHouse 결과 매핑 ---
-	                entity.setTestName(config.getTestName());
-	                entity.setTestTimeSec(finalTestTime);
-	                entity.setTestEndTime(endTime);
-	                
-	                // 💡 추가된 부분: event_time 매핑 (TIMESTAMP -> LocalDateTime)
-	                Timestamp timestamp = rs.getTimestamp("event_time");
-	                if (timestamp != null) {
-	                    entity.setEventTime(timestamp);
-	                }
-	                
-	                // ClickHouse 결과 필드 매핑
-	                entity.setQuery(rs.getString("query"));
-	                entity.setNormalizedQueryHash(rs.getString("normalized_query_hash"));
-	                
-	                // NUMERIC(22,2) 타입에 맞춰 BigDecimal로 변환하여 저장
-	                entity.setTotalUserCpuTime(BigDecimal.valueOf(rs.getDouble("Total_User_CPU_Time_sec")));
-	                entity.setTotalSystemCpuTime(BigDecimal.valueOf(rs.getDouble("Total_System_CPU_Time_sec")));
-	                entity.setTotalCpuCores(BigDecimal.valueOf(rs.getDouble("Total_Cores")));
-	                
-	                entitiesToSave.add(entity);
-	            }
-	            
-	            // 3. JPA Repository를 사용하여 결과 저장
-	            testResultRepository.saveAll(entitiesToSave);
-	            System.out.println("✅ [Service] 테스트 결과 " + entitiesToSave.size() + "개 JPA DB에 저장 완료.");
-	            
-	        }
-	    } catch (Exception e) {
-	        System.err.println("❌ [Service] ClickHouse 결과 추출/저장 실패: " + e.getMessage());
-	        e.printStackTrace();
-	    }
+		long actualDurationSeconds = 0;
+		if (this.testStartTime != null) {
+			// testStartTime과 endTime 사이의 Duration을 구하고 초(seconds)로 변환
+			actualDurationSeconds = Duration.between(this.testStartTime, endTime).getSeconds();
+		}
+
+		int finalTestTime = (int) Math.max(1, actualDurationSeconds);
+
+		try (Connection conn = loadTargetDataSource.getConnection(); Statement stmt = conn.createStatement()) {
+
+			// 1. ClickHouse 쿼리 정의 (event_time에 쉼표 추가 및 GROUP BY 수정 완료)
+			String clickHouseQueryLog = "SELECT query, " + "event_time, " + // 💡 쉼표(,) 추가됨
+					"normalized_query_hash, " + "http_user_agent, "
+					+ "sum(ProfileEvents['UserTimeMicroseconds']) / 1e6 AS Total_User_CPU_Time_sec, "
+					+ "sum(ProfileEvents['SystemTimeMicroseconds']) / 1e6 AS Total_System_CPU_Time_sec, "
+					+ "sum(ProfileEvents['OSCPUVirtualTimeMicroseconds']) / 1e6 AS Total_Cores "
+					+ "FROM system.query_log WHERE event_time > now() - INTERVAL " + finalTestTime + " SECOND "
+					+ "AND CAST(type, 'Int8') IN (2, 4) GROUP BY query, event_time, normalized_query_hash, http_user_agent";
+
+			// 2. 쿼리 실행 및 결과 저장
+			try (ResultSet rs = stmt.executeQuery(clickHouseQueryLog)) {
+				List<TestQueryResultEntity> entitiesToSave = new ArrayList<>();
+
+				while (rs.next()) {
+					TestQueryResultEntity entity = new TestQueryResultEntity();
+
+					// --- ClickHouse 결과 매핑 ---
+					entity.setTestName(config.getTestName());
+					entity.setTestTimeSec(finalTestTime);
+					entity.setTestEndTime(endTime);
+
+					// 💡 추가된 부분: event_time 매핑 (TIMESTAMP -> LocalDateTime)
+					Timestamp timestamp = rs.getTimestamp("event_time");
+					if (timestamp != null) {
+						entity.setEventTime(timestamp);
+					}
+
+					// ClickHouse 결과 필드 매핑
+					entity.setQuery(rs.getString("query"));
+					entity.setNormalizedQueryHash(rs.getString("normalized_query_hash"));
+					entity.setHttpUserAgent(rs.getString("http_user_agent"));
+
+					// NUMERIC(22,2) 타입에 맞춰 BigDecimal로 변환하여 저장
+					entity.setTotalUserCpuTime(BigDecimal.valueOf(rs.getDouble("Total_User_CPU_Time_sec")));
+					entity.setTotalSystemCpuTime(BigDecimal.valueOf(rs.getDouble("Total_System_CPU_Time_sec")));
+					entity.setTotalCpuCores(BigDecimal.valueOf(rs.getDouble("Total_Cores")));
+
+					entitiesToSave.add(entity);
+				}
+
+				// 3. JPA Repository를 사용하여 결과 저장
+				testQueryHashResultRepository.saveAll(entitiesToSave);
+				System.out.println("✅ [Service] Queyr Log 결과 " + entitiesToSave.size() + "개 JPA DB에 저장 완료.");
+
+			}
+
+			String clickHouseMetricLog = "SELECT event_time, ProfileEvent_OSCPUVirtualTimeMicroseconds / 1e6 AS Total_Cores "
+					+ "FROM system.metric_log WHERE event_time > now() - INTERVAL " + finalTestTime + " SECOND ";
+
+			try (ResultSet metrics = stmt.executeQuery(clickHouseMetricLog)) {
+				List<TestServerResultEntity> metricEntitiesToSave = new ArrayList<>();
+				
+				while (metrics.next()) {
+					TestServerResultEntity entity = new TestServerResultEntity();
+
+					entity.setTestName(config.getTestName());
+					entity.setTestTimeSec(finalTestTime);
+
+					// 💡 추가된 부분: event_time 매핑 (TIMESTAMP -> LocalDateTime)
+					Timestamp timestamp = metrics.getTimestamp("event_time");
+					if (timestamp != null) {
+						entity.setEventTime(timestamp);
+					}
+
+
+					// Total_Cores 매핑
+					entity.setTotalCpuCores(BigDecimal.valueOf(metrics.getDouble("Total_Cores")));
+
+					metricEntitiesToSave.add(entity);
+				}
+				
+				testServerResultRepository.saveAll(metricEntitiesToSave);
+				System.out.println("✅ [Service] Metric 결과 " + metricEntitiesToSave.size() + "개 JPA DB에 저장 완료.");
+			}
+		} catch (Exception e) {
+			System.err.println("❌ [Service] ClickHouse 결과 추출/저장 실패: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 }
