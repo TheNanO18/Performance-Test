@@ -25,7 +25,7 @@ public interface TestEzisProcessResultRepository extends JpaRepository<TestQuery
 	    "   MAX(t.testEndTime)) " +
 	    "FROM TestQueryResultEntity t " +
 	    "WHERE t.testName = :testName AND " + 
-	    "(:querySearch IS NULL OR t.query LIKE '%-- EZIS%') " +
+	    "t.query LIKE '%-- EZIS%' " +
 	    "GROUP BY t.testName, t.testTimeSec, t.normalizedQueryHash, t.httpUserAgent" 
 	)
 	
