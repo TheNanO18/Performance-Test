@@ -14,20 +14,22 @@ import com.example.performance_test.repository.entity.TestQueryResultEntity;
 public interface TestEzisProcessResultRepository extends JpaRepository<TestQueryResultEntity, Long> {
 	//@formatter:off
 	@Query(value = 
-	    "SELECT new com.example.performance_test.dto.TestEzisProcessQueryHistoryDto(" +
-	    "   t.testName, " +
-	    "   t.testTimeSec, " + 
-	    "   t.normalizedQueryHash, " + 
-	    "   t.httpUserAgent, " + 
-	    "   (SUM(t.totalCpuCores) / (COUNT(t) * t.testTimeSec)) * 10000, " +      
-	    "   (SUM(t.totalSystemCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " + 
-	    "   (SUM(t.totalUserCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " +  
-	    "   MAX(t.testEndTime)) " +
-	    "FROM TestQueryResultEntity t " +
-	    "WHERE t.testName = :testName AND " + 
-	    "t.query LIKE '%-- EZIS%' " +
-	    "GROUP BY t.testName, t.testTimeSec, t.normalizedQueryHash, t.httpUserAgent" 
-	)
+		    "SELECT new com.example.performance_test.dto.TestEzisProcessQueryHistoryDto(" +
+		    "   case WHEN t.query LIKE '%-- EZIS%' THEN 'Ezis Query Processes ' " + 
+		    "        ELSE 'Not Ezis Query Processes' " + 
+		    "    END, " + 
+		    "   t.testName, " +
+		    "   t.testTimeSec, " + 
+		    "   t.httpUserAgent, " + 
+		    "   (SUM(t.totalCpuCores) / (COUNT(t) * t.testTimeSec)) * 10000, " +
+		    "   (SUM(t.totalSystemCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " + 
+		    "   (SUM(t.totalUserCpuTime) / (COUNT(t) * t.testTimeSec)) * 10000, " +  
+		    "   MAX(t.testEndTime)) " + // 💡 총 9개 필드
+		    "FROM TestQueryResultEntity t " +
+		    "WHERE t.testName = :testName " + 
+		    "GROUP BY (case WHEN t.query LIKE '%-- EZIS%' THEN 'Ezis Query Processes ' ELSE 'Not Ezis Query Processes' END), " +
+		    "t.testName, t.testTimeSec, t.httpUserAgent, t.testEndTime" // 💡 GROUP BY에도 t.testEndTime 추가 (집계 함수에 사용되지 않았으므로 필수)
+		)
 	
 	List<TestEzisProcessQueryHistoryDto> findNormalizedResultsByTestName(@Param("testName") String testName);
 	//@formatter:on

@@ -4,29 +4,37 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class TestEzisProcessQueryHistoryDto {
+	private String category;
 	private String testName;
 	private Integer testTimeSec;
-	private String normalizedQueryHash;
 	private String httpUserAgent;
 	private BigDecimal totalCpuCores;
 	private BigDecimal totalSystemCpuTime;
 	private BigDecimal totalUserCpuTime;
 	private LocalDateTime maxTestEndTime;
 
-	public TestEzisProcessQueryHistoryDto(String testName, Integer testTimeSec, String normalizedQueryHash,
+	public TestEzisProcessQueryHistoryDto(String category, String testName, Integer testTimeSec,  
 			String httpUserAgent, BigDecimal totalCpuCores, 
 			BigDecimal totalSystemCpuTime, 
 			BigDecimal totalUserCpuTime, 
 			LocalDateTime maxTestEndTime 
 	) {
+		this.category = category;
 		this.testName = testName;
 		this.testTimeSec = testTimeSec;
-		this.normalizedQueryHash = normalizedQueryHash;
 		this.httpUserAgent = httpUserAgent;
 		this.totalCpuCores = totalCpuCores;
 		this.totalSystemCpuTime = totalSystemCpuTime;
 		this.totalUserCpuTime = totalUserCpuTime;
 		this.maxTestEndTime = maxTestEndTime;
+	}
+	
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
 	public String getTestName() {
@@ -43,14 +51,6 @@ public class TestEzisProcessQueryHistoryDto {
 
 	public void setTestTimeSec(Integer testTimeSec) {
 		this.testTimeSec = testTimeSec;
-	}
-
-	public String getNormalizedQueryHash() {
-		return normalizedQueryHash;
-	}
-
-	public void setNormalizedQueryHash(String normalizedQueryHash) {
-		this.normalizedQueryHash = normalizedQueryHash;
 	}
 
 	public String getHttpUserAgent() {

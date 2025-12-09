@@ -9,7 +9,7 @@ const ServerMetricsTable: React.FC<{ data: TestServerHistoryDto[] }> = ({ data }
     const [columnWidths, setColumnWidths] = useState<number[]>(DEFAULT_SERVER_WIDTHS);
     
     // 컬럼 헤더 정의
-    const headers = ['테스트명', '소요 시간(초)', '총 코어 사용량 (정규화 * 10k)', '종료 시각'];
+    const headers = ['테스트명', '소요 시간(초)', 'CPU 코어 사용량 ((total_core / (row count * time)) * 10k)', '종료 시각'];
     
     // 너비 조절 이벤트 핸들러
     const handleResize = (index: number, newWidth: number) => {

@@ -12,7 +12,7 @@ const QueryHashTable: React.FC<{ data: TestEzisHashQueryHistoryDto[] }> = ({ dat
     // 컬럼 헤더 정의
     const headers = [
         '테스트명', '소요 시간(초)', '쿼리 해시', 
-        '총 코어 (정규화 * 10k)', 'User CPU (정규화 * 10k)', '종료 시각'
+        'CPU 코어 사용량 ((total_core / (row count * time)) * 10k)', 'User CPU (정규화 * 10k)', '종료 시각'
     ];
     
     // 너비 조절 이벤트 핸들러

@@ -204,6 +204,7 @@ public class LoadTestService {
 
 					entity.setTestName(config.getTestName());
 					entity.setTestTimeSec(finalTestTime);
+					entity.setTestEndTime(endTime);
 
 					// 💡 추가된 부분: event_time 매핑 (TIMESTAMP -> LocalDateTime)
 					Timestamp timestamp = metrics.getTimestamp("event_time");

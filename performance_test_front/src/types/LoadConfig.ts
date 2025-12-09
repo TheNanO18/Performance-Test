@@ -66,11 +66,11 @@ export interface TestServerHistoryDto {
 // 3-C. 프로세스 쿼리 상세 결과
 export interface TestEzisProcessQueryHistoryDto {
     id: number;
+    category: string;
     testName: string;
     testTimeSec: number;
     maxTestEndTime: Date;
     httpUserAgent: string; // BigDecimal은 number로 매핑
-    normalizedQueryHash: string; // BigDecimal은 number로 매핑
     totalCpuCores: number; // BigDecimal은 number로 매핑
     totalSystemCpuTime: number;
     totalUserCpuTime: number;

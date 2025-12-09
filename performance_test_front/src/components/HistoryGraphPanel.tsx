@@ -209,6 +209,7 @@ export default function HistoryGraphPanel() {
                 title: { display: true, text: 'Test Name' }
             }
         },
+        
     };
 
     return (
@@ -218,13 +219,14 @@ export default function HistoryGraphPanel() {
 
             {/* 임시 UI: 비교할 테스트 이름 추가/입력 필드 */}
             {/* 💡 실제 구현 시, 사용자가 Test Name을 입력/선택하고 setTestNames를 호출하도록 해야 합니다. */}
+ 
 
             <div style={{ marginBottom: '15px' }}>
                 <input
                     type="text"
                     value={querySearch}
                     onChange={(e) => setQuerySearch(e.target.value)}
-                    placeholder="예: SELECT NOW"
+                    placeholder="EX) -- EZIS"
                     style={{ width: '150px', marginRight: '10px' }}
                 />
                 <label>쿼리 패턴 검색 (LIKE %) </label>
@@ -237,7 +239,7 @@ export default function HistoryGraphPanel() {
                     type="text"
                     value={tempTestName}
                     onChange={(e) => setTempTestName(e.target.value)}
-                    placeholder="비교할 테스트 이름 입력 (예: TEST_A)"
+                    placeholder="테스트 이름(예: CPU Test)"
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAddTestName(); }}
                 />
                 <button onClick={handleAddTestName} style={{ marginLeft: '10px' }}>
