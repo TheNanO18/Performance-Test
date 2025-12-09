@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { type LoadConfig } from '../types/LoadConfig';
 import { type LoadTaskConfig } from '../types/LoadTaskConfig';
 import HistoryGraphPanel from '../components/HistoryGraphPanel';
 import { useDBConfig } from '../context/DBContext';
+import { useGlobalStopwatch } from '../context/StopwatchContext';
 
 // LoadTaskConfig의 기본값 템플릿
 const DEFAULT_TASK: LoadTaskConfig = {
@@ -36,6 +37,15 @@ export default function LoadTestConfigurationPage() {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { startTest, stopTest } = useApi();
+
+    const stopwatch = useGlobalStopwatch();
+    const { startStopwatch, stopStopwatch, isFinished } = stopwatch;
+
+    useEffect(() => {
+        if (isFinished) { // stopwatch.isFinished 대신 isFinished 사용
+            alert(`✅ 테스트 지속 시간(${config.durationSeconds}초)이 경과되었습니다. 테스트가 종료됩니다.`);
+        }
+    }, [isFinished, config.durationSeconds]);
 
     // 1. 일반 입력 필드 핸들러 (DB 정보, TestName, DurationSeconds)
     const handleMainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,8 +111,12 @@ export default function LoadTestConfigurationPage() {
             ...config    // 💡 로컬 부하 설정 (tasks, testName, duration)
         } as LoadConfig;
 
+        const duration = config.durationSeconds;
+
         try {
             await startTest(config);
+
+            startStopwatch(config.durationSeconds); // stopwatch.startStopwatch 대신 startStopwatch 사용
 
             alert(`🎉 부하 테스트 시작 요청을 성공적으로 전송했습니다!`);
             setIsLoading(false);
@@ -117,8 +131,26 @@ export default function LoadTestConfigurationPage() {
 
     // 'STOP' 버튼 핸들러 (로직 동일)
     const handleStop = async () => {
-        await stopTest();
-        alert('테스트 중지 요청을 전송했습니다.');
+        try {
+            // 💡 1. 스톱워치 강제 중지
+            stopStopwatch();
+
+            await stopTest();
+            alert('🛑 테스트 중지 요청을 성공적으로 전송했습니다. 스톱워치가 중지되었습니다.');
+        } catch (error) {
+            alert('❌ 테스트 중지 요청 실패: 서버 연결을 확인해 주세요.');
+            console.error(error);
+        }
+    };
+
+    const formatTime = (totalSeconds: number): string => {
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = Math.floor(totalSeconds % 60);
+
+        const pad = (num: number) => num.toString().padStart(2, '0');
+
+        return `${pad(h)}:${pad(m)}:${pad(s)}`;
     };
 
     return (
@@ -178,6 +210,23 @@ export default function LoadTestConfigurationPage() {
                 </div>
 
                 <div className="right-panel">
+
+                    <div className="stopwatch-area" style={{
+                        padding: '15px',
+                        margin: '10px 0',
+                        border: '1px solid #777',
+                        borderRadius: '5px',
+                        textAlign: 'center',
+                        backgroundColor: stopwatch.isRunning ? 'rgba(0, 128, 0, 0.2)' : (stopwatch.isFinished ? 'rgba(255, 0, 0, 0.2)' : 'transparent')
+                    }}>
+                        <h3>테스트 진행 시간</h3>
+                        <div style={{ fontSize: '2em', fontWeight: 'bold', color: stopwatch.isRunning ? 'lime' : (stopwatch.isFinished ? 'red' : 'gray') }}>
+                            {formatTime(stopwatch.elapsedSeconds)} / {formatTime(config.durationSeconds)}
+                        </div>
+                        <p style={{ color: 'white', marginTop: '5px' }}>
+                            {stopwatch.isRunning ? `테스트 실행 중 (${config.durationSeconds}초 목표)` : (stopwatch.isFinished ? '지속 시간 경과 (종료)' : '대기 중')}
+                        </p>
+                    </div>
 
                     {/* 3. 💡 오른쪽 영역에 그래프 패널 배치 (우측 1열의 1~3행 모두 차지) */}
                     <div className="history-panel">
