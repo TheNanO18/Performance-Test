@@ -83,11 +83,8 @@ export default function HistoryGraphPanel() {
         const dataPromises = testNames.map(name => {
             let url = `/api/history/stress-results?testName=${name}`;
 
-            // 💡 querySearch 상태 값 (컴포넌트 내부 상태)을 사용합니다.
-            if (querySearch) {
-                // URL 인코딩을 적용하여 특수 문자를 안전하게 전송
-                url += `&querySearch=${encodeURIComponent(querySearch)}`;
-            }
+            url += `&querySearch=${encodeURIComponent(querySearch)}`;
+
             return axios.get(url);
         });
 

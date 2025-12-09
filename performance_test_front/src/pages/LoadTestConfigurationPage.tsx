@@ -39,13 +39,15 @@ export default function LoadTestConfigurationPage() {
     const { startTest, stopTest } = useApi();
 
     const stopwatch = useGlobalStopwatch();
-    const { startStopwatch, stopStopwatch, isFinished } = stopwatch;
+    const { startStopwatch, stopStopwatch, resetStopwatch, setAlertShown, duration, isFinished, isAlertShown, isRunning } = stopwatch;
 
     useEffect(() => {
-        if (isFinished) { // stopwatch.isFinished 대신 isFinished 사용
+        if (isFinished && !isAlertShown) { // stopwatch.isFinished 대신 isFinished 사용
             alert(`✅ 테스트 지속 시간(${config.durationSeconds}초)이 경과되었습니다. 테스트가 종료됩니다.`);
+
+            setAlertShown(true);
         }
-    }, [isFinished, config.durationSeconds]);
+    }, [isFinished, isAlertShown, setAlertShown, config.durationSeconds]);
 
     // 1. 일반 입력 필드 핸들러 (DB 정보, TestName, DurationSeconds)
     const handleMainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +103,25 @@ export default function LoadTestConfigurationPage() {
         });
     };
 
+    // 💡 [새로 추가] 설정값 변경 시 스톱워치 디스플레이 초기화
+    useEffect(() => {
+        // 1. 테스트가 종료된 상태(isFinished)이고
+        // 2. 현재 실행 중이 아닐 때(!isRunning)
+        if (isFinished && !isRunning) {
+            // resetStopwatch를 호출하여 elapsedSeconds, duration, isFinished 상태를 모두 초기화합니다.
+            // 이렇게 하면 스톱워치 디스플레이가 "00:00:00 / 00:00:00"로 초기화되고 "대기 중" 상태로 돌아갑니다.
+            resetStopwatch();
+        }
+    }, [
+        // config.durationSeconds가 변경되거나 (새 테스트를 위한 값 입력), 
+        // isFinished 상태가 변경되거나,
+        // isRunning 상태가 변경될 때마다 이 로직을 확인합니다.
+        config.durationSeconds, 
+        isFinished, 
+        isRunning, 
+        resetStopwatch
+    ]);
+
     // 'START' 버튼 핸들러 (로직 동일)
     const handleStart = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -110,6 +131,8 @@ export default function LoadTestConfigurationPage() {
             ...dbConfig, // 💡 DB 연결 정보
             ...config    // 💡 로컬 부하 설정 (tasks, testName, duration)
         } as LoadConfig;
+
+        resetStopwatch();
 
         const duration = config.durationSeconds;
 
@@ -221,10 +244,10 @@ export default function LoadTestConfigurationPage() {
                     }}>
                         <h3>테스트 진행 시간</h3>
                         <div style={{ fontSize: '2em', fontWeight: 'bold', color: stopwatch.isRunning ? 'lime' : (stopwatch.isFinished ? 'red' : 'gray') }}>
-                            {formatTime(stopwatch.elapsedSeconds)} / {formatTime(config.durationSeconds)}
+                            {formatTime(stopwatch.elapsedSeconds)} / {formatTime(duration)}
                         </div>
                         <p style={{ color: 'white', marginTop: '5px' }}>
-                            {stopwatch.isRunning ? `테스트 실행 중 (${config.durationSeconds}초 목표)` : (stopwatch.isFinished ? '지속 시간 경과 (종료)' : '대기 중')}
+                            {stopwatch.isRunning ? `테스트 실행 중 (${duration}초 목표)` : (stopwatch.isFinished ? '지속 시간 경과 (종료)' : '대기 중')}
                         </p>
                     </div>
 

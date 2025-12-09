@@ -23,7 +23,7 @@ public interface TestStressResultRepository extends JpaRepository<TestQueryResul
 	    "   MAX(t.testEndTime)) " +
 	    "FROM TestQueryResultEntity t " +
 	    "WHERE t.testName = :testName AND " + 
-	    "(:querySearch IS NULL OR t.query LIKE CONCAT('%', :querySearch, '%')) " +
+	    "( (:querySearch IS NULL) OR (TRIM(:querySearch) = '') OR t.query LIKE CONCAT('%', :querySearch, '%') )" +
 	    "GROUP BY t.testName, t.testTimeSec" 
 	)
 	
