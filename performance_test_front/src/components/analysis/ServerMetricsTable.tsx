@@ -3,7 +3,7 @@ import ResizableTitle from '../ResizableTitle';
 import { type TestServerHistoryDto } from '../../types/LoadConfig';
 
 // 💡 기본 컬럼 너비 정의 (px 단위)
-const DEFAULT_SERVER_WIDTHS = [150, 100, 200, 150]; // 4개 컬럼
+const DEFAULT_SERVER_WIDTHS = [150, 100, 200, 100]; // 4개 컬럼
 
 const ServerMetricsTable: React.FC<{ data: TestServerHistoryDto[] }> = ({ data }) => {
     const [columnWidths, setColumnWidths] = useState<number[]>(DEFAULT_SERVER_WIDTHS);

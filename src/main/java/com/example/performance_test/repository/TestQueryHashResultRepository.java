@@ -25,7 +25,8 @@ public interface TestQueryHashResultRepository extends JpaRepository<TestQueryRe
 		    "FROM TestQueryResultEntity t " +
 		    "WHERE t.testName = :testName AND " + 
 		    "t.query LIKE '%-- EZIS%' " +
-		    "GROUP BY t.testName, t.testTimeSec, t.normalizedQueryHash" 
+		    "GROUP BY t.testName, t.testTimeSec, t.normalizedQueryHash " +
+		    "ORDER BY (SUM(t.totalCpuCores) / (COUNT(t) * t.testTimeSec)) * 10000 desc"
 		)
 		
 		
